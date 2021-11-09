@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>title</title>
+  <title>Monotone Crescendo in WebAssembly</title>
   <script>
     const createInstance = async () => {
       const path = 'monotone_crescendo.wasm';
@@ -14,14 +14,14 @@
       return instance;
     };
 
-    const write = (string, buffer, pointer) => {
+    const write = window.write = (string, buffer, pointer) => {
       const view = new Uint8Array(buffer, pointer, 1024);
       const encoder = new TextEncoder();
 
       view.set(encoder.encode(string));
     }
 
-    const read = (buffer, pointer) => {
+    const read = window.read = (buffer, pointer) => {
       const view = new Uint8Array(buffer, pointer, 1024);
       const length = view.findIndex(byte => byte === 0);
       const decoder = new TextDecoder();
@@ -30,20 +30,27 @@
     };
 
     (async () => {
-      const instance = await createInstance();
-      const memory = instance.exports.memory;
-      const pointer = instance.exports.alloc();
+      const instance = window.instance = await createInstance();
+      const memory = window.memory = instance.exports.memory;
+      const pointer = window.pointer = instance.exports.alloc();
 
       write('110', memory.buffer, pointer);
       instance.exports.make_me_monotone_crescendo(pointer);
 
       console.log('answer:', read(memory.buffer, pointer));
-      document.querySelector('h2').textContent = read(memory.buffer, pointer);
-      instance.exports.dealloc(pointer);
     })();
+
+    document.querySelector('#num').addEventListener('change', (e) => {
+      window.write(e.data, window.memory.buffer, window.pointer);
+      instance.exports.make_me_monotone_crescendo(pointer);
+      document.querySelector('h3').innerText = 'flips needed: ' + read(window.memory.buffer, pointer);
+    });
   </script>
 </head>
 
 <body>
-  <h2>Still thinking...</h2>
+  <h2>Monotone Crescendo in WebAssembly</h2>
+  <label for="">Please enter a binary number:</label>
+  <input id="num" type="text" />
+  <h3>Answer will appear here....</h3>
 </body>
