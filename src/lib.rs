@@ -31,7 +31,7 @@ pub unsafe extern "C" fn dealloc(ptr: *mut c_void) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn make_me_montone_crescendo(ptr: *mut u8) {
+pub unsafe extern "C" fn make_me_monotone_crescendo(ptr: *mut u8) {
     let input = CStr::from_ptr(ptr as *const i8).to_str().unwrap();
     let flips = monototone_crescendo(input);
     let answer = format!("The minimum number of flips needed is: {}", flips);
@@ -44,7 +44,7 @@ pub unsafe extern "C" fn make_me_montone_crescendo(ptr: *mut u8) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn make_me_montone_crescendo_prefix_sums(ptr: *mut u8) {
+pub unsafe extern "C" fn make_me_monotone_crescendo_prefix_sums(ptr: *mut u8) {
     let input = CStr::from_ptr(ptr as *const i8).to_str().unwrap();
     let flips = monotone_crescendo_prefix_sums(input);
     let answer = format!("The minimum number of flips needed is: {}", flips);
