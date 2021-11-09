@@ -6,7 +6,7 @@
   <title>title</title>
   <script>
     const createInstance = async () => {
-      const path = 'monotone-crescendo.wasm';
+      const path = 'monotone_crescendo.wasm';
       const response = await fetch(path);
       const bytes = await response.arrayBuffer();
       const { instance } = await WebAssembly.instantiate(bytes, {});
