@@ -29,21 +29,19 @@
       return decoder.decode(new Uint8Array(buffer, pointer, length));
     };
 
-    (async () => {
+    const setup = async () => {
       const instance = window.instance = await createInstance();
       const memory = window.memory = instance.exports.memory;
       const pointer = window.pointer = instance.exports.alloc();
+    };
 
-      write('110', memory.buffer, pointer);
-      instance.exports.make_me_monotone_crescendo(pointer);
-
-      console.log('answer:', read(memory.buffer, pointer));
-    })();
-
-    document.querySelector('#num').addEventListener('change', (e) => {
-      window.write(e.data, window.memory.buffer, window.pointer);
-      instance.exports.make_me_monotone_crescendo(pointer);
-      document.querySelector('h3').innerText = 'flips needed: ' + read(window.memory.buffer, pointer);
+    document.addEventListener('DOMContentLoaded', async () => {
+      await setup();
+      document.querySelector('#num').addEventListener('change', (e) => {
+        window.write(e.data, window.memory.buffer, window.pointer);
+        window.instance.exports.make_me_monotone_crescendo(pointer);
+        document.querySelector('h3').innerText = 'flips needed: ' + read(window.memory.buffer, pointer);
+      });
     });
   </script>
 </head>
