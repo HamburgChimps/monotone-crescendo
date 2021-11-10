@@ -16,8 +16,8 @@ mod tests {
 }
 
 #[no_mangle]
-pub extern "C" fn alloc() -> *mut c_void {
-    let mut buf = Vec::with_capacity(1024);
+pub extern "C" fn alloc(len: usize) -> *mut c_void {
+    let mut buf = Vec::with_capacity(len);
     let ptr = buf.as_mut_ptr();
 
     mem::forget(buf);
@@ -26,8 +26,8 @@ pub extern "C" fn alloc() -> *mut c_void {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn dealloc(ptr: *mut c_void) {
-    let _ = Vec::from_raw_parts(ptr, 0, 1024);
+pub unsafe extern "C" fn dealloc(ptr: *mut c_void, size: usize) {
+    let _ = Vec::from_raw_parts(ptr, size, size);
 }
 
 #[no_mangle]
