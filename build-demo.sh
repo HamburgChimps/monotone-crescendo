@@ -9,5 +9,4 @@ git checkout main -- demo
 cp demo/* .
 rm -rf demo
 git commit -am 'update demo'
-git push
-git checkout main
+git push && git checkout main || git checkout main
