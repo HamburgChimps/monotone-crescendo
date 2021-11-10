@@ -7,6 +7,7 @@ cp target/wasm32-unknown-unknown/release/monotone_crescendo.wasm demo/
 git checkout gh-pages
 git checkout main -- demo
 cp demo/* .
+rm -rf demo
 git commit -am 'update demo'
 git push
 git checkout main
