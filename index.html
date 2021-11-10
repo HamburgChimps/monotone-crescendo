@@ -26,6 +26,8 @@
       const length = view.findIndex(byte => byte === 0);
       const decoder = new TextDecoder();
 
+      console.log({ view, length, decoder });
+
       return decoder.decode(new Uint8Array(buffer, pointer, length));
     };
 
