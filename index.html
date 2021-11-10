@@ -5,6 +5,7 @@
   <meta charset="utf-8">
   <title>Monotone Crescendo in WebAssembly</title>
   <script>
+    mc = {};
     const createInstance = async () => {
       const path = 'monotone_crescendo.wasm';
       const response = await fetch(path);
@@ -14,35 +15,38 @@
       return instance;
     };
 
-    const write = window.write = (string, buffer, pointer) => {
+    mc.write = (string, buffer, pointer) => {
       const view = new Uint8Array(buffer, pointer, 1024);
       const encoder = new TextEncoder();
 
       view.set(encoder.encode(string));
     }
 
-    const read = window.read = (buffer, pointer) => {
+    mc.read = (buffer, pointer) => {
       const view = new Uint8Array(buffer, pointer, 1024);
       const length = view.findIndex(byte => byte === 0);
       const decoder = new TextDecoder();
 
-      console.log({ view, length, decoder });
-
       return decoder.decode(new Uint8Array(buffer, pointer, length));
     };
 
-    const setup = async () => {
-      const instance = window.instance = await createInstance();
-      const memory = window.memory = instance.exports.memory;
-      const pointer = window.pointer = instance.exports.alloc();
+    mc.setup = async () => {
+      const instance = mc.instance = await createInstance();
+      mc.memory = instance.exports.memory;
+      mc.alloc = instance.exports.alloc;
+      mc.dealloc = instance.exports.dealloc;
     };
 
     document.addEventListener('DOMContentLoaded', async () => {
-      await setup();
+      await mc.setup();
       document.querySelector('#num').addEventListener('change', (e) => {
-        window.write(e.target.value, window.memory.buffer, window.pointer);
-        window.instance.exports.make_me_monotone_crescendo(pointer);
-        document.querySelector('h3').innerText = read(window.memory.buffer, pointer);
+        const pointer = mc.alloc();
+
+        mc.write(e.target.value, mc.memory.buffer, pointer);
+        mc.instance.exports.make_me_monotone_crescendo(pointer);
+        document.querySelector('h3').innerText = mc.read(mc.memory.buffer, pointer);
+
+        mc.dealloc(pointer);
       });
     });
   </script>
