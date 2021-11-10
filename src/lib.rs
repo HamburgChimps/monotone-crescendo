@@ -16,8 +16,8 @@ mod tests {
 }
 
 #[no_mangle]
-pub extern "C" fn alloc(len: usize) -> *mut c_void {
-    let mut buf = Vec::with_capacity(len);
+pub extern "C" fn alloc() -> *mut c_void {
+    let mut buf = Vec::with_capacity(1024);
     let ptr = buf.as_mut_ptr();
 
     mem::forget(buf);
@@ -43,19 +43,7 @@ pub unsafe extern "C" fn make_me_monotone_crescendo(ptr: *mut u8) {
     return_bytes[..c_str_bytes.len()].copy_from_slice(c_str_bytes);
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn make_me_monotone_crescendo_prefix_sums(ptr: *mut u8) {
-    let input = CStr::from_ptr(ptr as *const i8).to_str().unwrap();
-    let flips = monotone_crescendo_prefix_sums(input);
-    let answer = format!("The minimum number of flips needed is: {}", flips);
-
-    let c_str = CString::new(answer).unwrap();
-    let c_str_bytes = c_str.as_bytes_with_nul();
-
-    let return_bytes = std::slice::from_raw_parts_mut(ptr, 1024);
-    return_bytes[..c_str_bytes.len()].copy_from_slice(c_str_bytes);
-}
-
+#[allow(dead_code)]
 fn monotone_crescendo_prefix_sums(s: &str) -> i32 {
     let str_size = s.chars().count() as i32;
     let mut prefix_sums = vec![0; str_size as usize + 1];
