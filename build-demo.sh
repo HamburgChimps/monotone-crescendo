@@ -1,4 +1,4 @@
-#!/usr/bin/env bash -xe
+#!/usr/bin/env bash -x
 
 # build for gh-pages
 cargo build --target wasm32-unknown-unknown --release
