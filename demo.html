@@ -11,11 +11,12 @@
       const response = await fetch(path);
       const bytes = await response.arrayBuffer();
       const { instance } = await WebAssembly.instantiate(bytes, {});
-
+      console.log(bytes.byteLength);
       return instance;
     };
 
     mc.write = (string, buffer, pointer) => {
+      string = `${string}\0`;
       const view = new Uint8Array(buffer, pointer, 1024);
       const encoder = new TextEncoder();
 
@@ -35,18 +36,16 @@
       mc.memory = instance.exports.memory;
       mc.alloc = instance.exports.alloc;
       mc.dealloc = instance.exports.dealloc;
+
+      mc.pointer = mc.alloc();
     };
 
     document.addEventListener('DOMContentLoaded', async () => {
       await mc.setup();
       document.querySelector('#num').addEventListener('change', (e) => {
-        const pointer = mc.alloc();
-
-        mc.write(e.target.value, mc.memory.buffer, pointer);
-        mc.instance.exports.make_me_monotone_crescendo(pointer);
-        document.querySelector('h3').innerText = mc.read(mc.memory.buffer, pointer);
-
-        mc.dealloc(pointer);
+        mc.write(e.target.value, mc.memory.buffer, mc.pointer);
+        mc.instance.exports.make_me_monotone_crescendo(mc.pointer);
+        document.querySelector('h3').innerText = mc.read(mc.memory.buffer, mc.pointer);
       });
     });
   </script>
