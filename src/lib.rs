@@ -43,11 +43,10 @@ pub unsafe extern "C" fn make_me_monotone_crescendo(ptr: *mut u8) {
     return_bytes[..c_str_bytes.len()].copy_from_slice(c_str_bytes);
 }
 
-#[allow(dead_code)]
 fn monotone_crescendo_prefix_sums(s: &str) -> i32 {
     let str_size = s.chars().count() as i32;
     let mut prefix_sums = vec![0; str_size as usize + 1];
-    let mut ans: i32 = MAX;
+    let mut min_flips: i32 = MAX;
 
     for (i, char) in s.chars().enumerate() {
         prefix_sums[i + 1] = prefix_sums[i] + (if char == '1' { 1 } else { 0 });
@@ -56,26 +55,23 @@ fn monotone_crescendo_prefix_sums(s: &str) -> i32 {
     let mut j = 0;
 
     while j <= str_size {
-        let thing_i_dont_know = prefix_sums[j as usize] + str_size;
-        let thing_i_dont_know_two = prefix_sums[str_size as usize] - prefix_sums[j as usize];
-        ans = min(
-            ans,
-            thing_i_dont_know
-                - (j as i32)
-                - (prefix_sums[str_size as usize] - prefix_sums[j as usize]),
-        );
+        let ones_before_j = prefix_sums[j as usize];
+        let ones_after_j = prefix_sums[str_size as usize] - prefix_sums[j as usize];
+
+        let length_of_str_after_j = str_size - j;
+        let zeroes_after_j = length_of_str_after_j - ones_after_j;
+
+        min_flips = min(min_flips, ones_before_j + zeroes_after_j);
 
         println!(
-            "ans: {:?}, thing_i_dont_know: {:?}, thing_i_dont_know_two: {:?}",
-            ans, thing_i_dont_know, thing_i_dont_know_two
+            "min_flips: {:?}, j: {:?}, ones_before_j: {:?}, zeroes_after_j: {:?}",
+            min_flips, j, ones_before_j, zeroes_after_j
         );
 
         j += 1;
     }
 
-    println!("{:?}", ans);
-
-    ans
+    min_flips
 }
 
 fn monototone_crescendo(s: &str) -> i32 {
