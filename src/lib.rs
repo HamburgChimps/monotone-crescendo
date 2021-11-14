@@ -43,7 +43,29 @@ pub unsafe extern "C" fn make_me_monotone_crescendo(ptr: *mut u8) {
     return_bytes[..c_str_bytes.len()].copy_from_slice(c_str_bytes);
 }
 
-fn monotone_crescendo_prefix_sums(s: &str) -> i32 {
+/// # This is the [official solution][0] to [LeetCode problem #926][1]
+///
+/// The solution was simply translated by me into rust from java.
+///
+/// ## Explanation
+///
+/// I find the explanation on LeetCode to this solution somewhat overcomplicated and hard to understand, so I will attempt
+/// to explain it (hopefully) a bit simpler here.
+///
+/// The first thing this solution does is calculate the [prefix sum][2] of every item in the string and store it in an array where the index
+/// of the array corresponds to the index of the character in the string. So for example, if we had the string `11010`, the prefix sum array
+/// for that string would look like: `[0,1,2,2,3,3]`
+/// 
+/// Left off here...
+///
+/// This solution works by looping through the given string and, for each character in the string, analyzing the string as two halves partioned
+/// at that character. The number of 1's in the first half are added to the number of 0's in the second half to determine the total number of flips
+/// needed to make the string montone increasing for that location in the string.
+/// 
+/// [0]: <https://leetcode.com/problems/flip-string-to-monotone-increasing/solution/>
+/// [1]: <https://leetcode.com/problems/flip-string-to-monotone-increasing/>
+/// [2]: <https://en.wikipedia.org/wiki/Prefix_sum>
+pub fn monotone_crescendo_prefix_sums(s: &str) -> i32 {
     let str_size = s.chars().count() as i32;
     let mut prefix_sums = vec![0; str_size as usize + 1];
     let mut min_flips: i32 = MAX;
@@ -74,7 +96,7 @@ fn monotone_crescendo_prefix_sums(s: &str) -> i32 {
     min_flips
 }
 
-fn monototone_crescendo(s: &str) -> i32 {
+pub fn monototone_crescendo(s: &str) -> i32 {
     let mut ones = 0;
     let mut flips = 0;
 

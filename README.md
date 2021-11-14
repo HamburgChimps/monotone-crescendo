@@ -14,3 +14,7 @@ These two blog posts from Dr. Apodaca were most helpful:
 2. [Rust and WebAssembly from Scratch: Hello World with Strings](https://depth-first.com/articles/2020/07/07/rust-and-webassembly-from-scratch-hello-world-with-strings/)
 
 Further credit goes to [Radu Matei](https://radu-matei.com) and his [blog post](https://radu-matei.com/blog/practical-guide-to-wasm-memory), which helped me build upon the concepts I learned from Dr. Apodaca's posts.
+
+## Documentation
+
+Detailed documnetation generated via [rustdoc](https://doc.rust-lang.org/rustdoc/index.html) can be found [alongside the demo](https://hamburgchimps.github.io/monotone-crescendo/doc).
