@@ -60,7 +60,7 @@ pub unsafe extern "C" fn make_me_monotone_crescendo(ptr: *mut u8) {
 ///
 /// This solution works by looping through the given string and, for each character in the string, analyzing the string as two halves partioned
 /// at that character. The number of 1's in the first half are added to the number of 0's in the second half to determine the total number of flips
-/// needed to make the string montone increasing for that location in the string.
+/// needed to make the string monotone increasing for that location in the string.
 /// 
 /// [0]: <https://leetcode.com/problems/flip-string-to-monotone-increasing/solution/>
 /// [1]: <https://leetcode.com/problems/flip-string-to-monotone-increasing/>
