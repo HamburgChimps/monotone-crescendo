@@ -17,4 +17,4 @@ Further credit goes to [Radu Matei](https://radu-matei.com) and his [blog post](
 
 ## Documentation
 
-Detailed documnetation generated via [rustdoc](https://doc.rust-lang.org/rustdoc/index.html) can be found [alongside the demo](https://hamburgchimps.github.io/monotone-crescendo/doc).
+Detailed documnetation generated via [rustdoc](https://doc.rust-lang.org/rustdoc/index.html) can be found [alongside the demo](https://hamburgchimps.github.io/monotone-crescendo/doc/montone_crescendo).
