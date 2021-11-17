@@ -1,5 +1,5 @@
 //! A library for calculating the least number of flips needed to make a binary string monotone increasing.
-//! Also contains utility functions for allocating webassembly memory and returning a pointer to it, as well
+//! Also contains utility functions for allocating WebAssembly linear memory and returning a pointer to it, as well
 //! as deallocating said memory. It also contains a function that can be called via WebAssembly, and thus Javascript.
 use std::{cmp::min, ffi::CStr, ffi::CString, mem, os::raw::c_void};
 
