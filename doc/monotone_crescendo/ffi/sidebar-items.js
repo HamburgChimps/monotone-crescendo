@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["alloc","Allocate memory in WebAssembly’s linear memory and return its offset"],["dealloc","Deallocate memory in WebAssembly’s linear memory at the offset located at `ptr`"],["make_me_monotone_crescendo",""]]});
