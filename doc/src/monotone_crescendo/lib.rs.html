@@ -190,6 +190,17 @@
 <span id="190">190</span>
 <span id="191">191</span>
 <span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A library for calculating the least number of flips needed to make a binary string monotone increasing.</span>
 <span class="doccomment">//! Also contains utility functions for allocating WebAssembly linear memory and returning a pointer to it, as well</span>
 <span class="doccomment">//! as deallocating said memory. It also contains a function that can be called via WebAssembly, and thus Javascript.</span>
@@ -213,8 +224,8 @@
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test</span>() {
-        <span class="macro">assert_eq!</span>(<span class="ident">monototone_crescendo</span>(<span class="string">&quot;11010&quot;</span>), <span class="number">2</span>);
+    <span class="kw">fn</span> <span class="ident">test_cumulative</span>() {
+        <span class="macro">assert_eq!</span>(<span class="ident">monototone_crescendo_cumulative</span>(<span class="string">&quot;11010&quot;</span>), <span class="number">2</span>);
     }
 }
 
@@ -241,7 +252,7 @@
 <span class="attribute">#[<span class="ident">no_mangle</span>]</span>
 <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">make_me_monotone_crescendo</span>(<span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>) {
     <span class="kw">let</span> <span class="ident">input</span> <span class="op">=</span> <span class="ident">CStr::from_ptr</span>(<span class="ident">ptr</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">i8</span>).<span class="ident">to_str</span>().<span class="ident">unwrap</span>();
-    <span class="kw">let</span> <span class="ident">flips</span> <span class="op">=</span> <span class="ident">monototone_crescendo</span>(<span class="ident">input</span>);
+    <span class="kw">let</span> <span class="ident">flips</span> <span class="op">=</span> <span class="ident">monototone_crescendo_cumulative</span>(<span class="ident">input</span>);
     <span class="kw">let</span> <span class="ident">answer</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;The minimum number of flips needed is: {}&quot;</span>, <span class="ident">flips</span>);
 
     <span class="kw">let</span> <span class="ident">c_str</span> <span class="op">=</span> <span class="ident">CString::new</span>(<span class="ident">answer</span>).<span class="ident">unwrap</span>();
@@ -365,7 +376,18 @@
     <span class="ident">min_flips</span>
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">monototone_crescendo</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+<span class="doccomment">/// # This is an ingenious solution which was [contributed][0] by LeetCode user [tarunbisht][1] and translated to Rust by me</span>
+<span class="doccomment">/// </span>
+<span class="doccomment">/// ## Explanation</span>
+<span class="doccomment">/// </span>
+<span class="doccomment">/// This solution works by keeping a running total of all ones and all zeroes, where the count of zeroes is initlally contained in the variable `flips`.</span>
+<span class="doccomment">/// The variable `flips` is then set to the minimum value of the running total of zeroes or running total of ones.</span>
+<span class="doccomment">/// </span>
+<span class="doccomment">/// Overall this solution is not only simpler to understand, at least for me, but also requires only O(1) space as opposed to O(N) space.</span>
+<span class="doccomment">/// </span>
+<span class="doccomment">/// [0]: &lt;https://leetcode.com/problems/flip-string-to-monotone-increasing/solution/725259&gt;</span>
+<span class="doccomment">/// [1]: &lt;https://leetcode.com/tarunbisht&gt;</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">monototone_crescendo_cumulative</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ones</span> <span class="op">=</span> <span class="number">0</span>;
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">flips</span> <span class="op">=</span> <span class="number">0</span>;
 
