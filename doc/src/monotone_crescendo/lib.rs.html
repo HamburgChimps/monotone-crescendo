@@ -177,6 +177,14 @@
 <span id="177">177</span>
 <span id="178">178</span>
 <span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A library for calculating the least number of flips needed to make a binary string monotone increasing.</span>
 <span class="doccomment">//! Also contains utility functions for allocating webassembly memory and returning a pointer to it, as well</span>
 <span class="doccomment">//! as deallocating said memory. It also contains a function that can be called via WebAssembly, and thus Javascript.</span>
@@ -193,7 +201,10 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_with_prefix_sums_without_redundant_zero</span>() {
-        <span class="macro">assert_eq!</span>(<span class="ident">monotone_crescendo_prefix_sums_without_redundant_zero</span>(<span class="string">&quot;11010&quot;</span>), <span class="number">2</span>);
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">monotone_crescendo_prefix_sums_without_redundant_zero</span>(<span class="string">&quot;11010&quot;</span>),
+            <span class="number">2</span>
+        );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -202,6 +213,7 @@
     }
 }
 
+<span class="doccomment">/// # Allocate memory in WebAssembly&#39;s linear memory and return its offset</span>
 <span class="attribute">#[<span class="ident">no_mangle</span>]</span>
 <span class="kw">pub</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">alloc</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="number">1024</span>);
@@ -212,9 +224,13 @@
     <span class="ident">ptr</span>
 }
 
+<span class="doccomment">/// # Deallocate memory in WebAssembly&#39;s linear memory at the offset located at `ptr`</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// No explicit calls to [std::mem::drop] are needed as [std::vec::Vec::from_raw_parts] takes ownership</span>
+<span class="doccomment">/// of the memory pointed at by `ptr`.</span>
 <span class="attribute">#[<span class="ident">no_mangle</span>]</span>
-<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">dealloc</span>(<span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>, <span class="ident">size</span>: <span class="ident">usize</span>) {
-    <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Vec::from_raw_parts</span>(<span class="ident">ptr</span>, <span class="ident">size</span>, <span class="ident">size</span>);
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">dealloc</span>(<span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>) {
+    <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Vec::from_raw_parts</span>(<span class="ident">ptr</span>, <span class="number">1024</span>, <span class="number">1024</span>);
 }
 
 <span class="attribute">#[<span class="ident">no_mangle</span>]</span>
@@ -294,7 +310,7 @@
 }
 
 <span class="doccomment">/// # Essentially the same solution as [monotone_crescendo_prefix_sums] except without the redundant leading zero in the prefix sum array</span>
-<span class="doccomment">/// </span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// This function also utilizes [u8]&#39;s instead of [i32]&#39;s. Our input will always lead to positive prefix sums and a positive return value.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">monotone_crescendo_prefix_sums_without_redundant_zero</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
     <span class="kw">let</span> <span class="ident">str_size</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">chars</span>().<span class="ident">count</span>();
@@ -319,7 +335,7 @@
     <span class="kw">while</span> <span class="ident">j</span> <span class="op">&lt;</span> <span class="ident">str_size</span> {
         <span class="kw">let</span> <span class="ident">ones_before_j</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">j</span> {
             <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">prefix_sums</span>[<span class="ident">j</span>]
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">prefix_sums</span>[<span class="ident">j</span>],
         };
         <span class="kw">let</span> <span class="ident">ones_after_j</span> <span class="op">=</span> <span class="ident">prefix_sums</span>[<span class="ident">str_size</span> <span class="op">-</span> <span class="number">1</span>] <span class="op">-</span> <span class="ident">prefix_sums</span>[<span class="ident">j</span>];
 
