@@ -185,6 +185,11 @@
 <span id="185">185</span>
 <span id="186">186</span>
 <span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A library for calculating the least number of flips needed to make a binary string monotone increasing.</span>
 <span class="doccomment">//! Also contains utility functions for allocating webassembly memory and returning a pointer to it, as well</span>
 <span class="doccomment">//! as deallocating said memory. It also contains a function that can be called via WebAssembly, and thus Javascript.</span>
@@ -311,11 +316,16 @@
 
 <span class="doccomment">/// # Essentially the same solution as [monotone_crescendo_prefix_sums] except without the redundant leading zero in the prefix sum array</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// This function also utilizes [u8]&#39;s instead of [i32]&#39;s. Our input will always lead to positive prefix sums and a positive return value.</span>
+<span class="doccomment">/// This function also utilizes [u8]&#39;s instead of [i32]&#39;s.</span>
+<span class="doccomment">/// This could have also been done in [monotone_crescendo_prefix_sums] as our input will always lead to positive prefix sums and a positive</span>
+<span class="doccomment">/// return value which should all be less than or equal to 255. The only reason [monotone_crescendo_prefix_sums] uses [i32]&#39;s is that I made an</span>
+<span class="doccomment">/// arbitrary choice to do so, and when removing the redundant zero I thought about it a bit more and realized [u8]&#39;s would be fine.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">monotone_crescendo_prefix_sums_without_redundant_zero</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
     <span class="kw">let</span> <span class="ident">str_size</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">chars</span>().<span class="ident">count</span>();
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">prefix_sums</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">str_size</span>);
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">min_flips</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="ident">u8::MAX</span>;
+
+    <span class="macro">println!</span>(<span class="string">&quot;min_flips: {:?}&quot;</span>, <span class="ident">min_flips</span>);
 
     <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">char</span>) <span class="kw">in</span> <span class="ident">s</span>.<span class="ident">chars</span>().<span class="ident">enumerate</span>() {
         <span class="kw">let</span> <span class="ident">num</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">char</span> {
