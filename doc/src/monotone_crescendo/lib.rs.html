@@ -201,14 +201,24 @@
 <span id="201">201</span>
 <span id="202">202</span>
 <span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A library for calculating the least number of flips needed to make a binary string monotone increasing.</span>
 <span class="doccomment">//! Also contains utility functions for allocating WebAssembly linear memory and returning a pointer to it, as well</span>
 <span class="doccomment">//! as deallocating said memory. It also contains a function that can be called via WebAssembly, and thus Javascript.</span>
-<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">cmp::min</span>, <span class="ident">ffi::CStr</span>, <span class="ident">ffi::CString</span>, <span class="ident">mem</span>, <span class="ident">os::raw::c_void</span>};
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::solution</span>::<span class="kw-2">*</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_with_prefix_sums</span>() {
@@ -229,180 +239,192 @@
     }
 }
 
-<span class="doccomment">/// # Allocate memory in WebAssembly&#39;s linear memory and return its offset</span>
-<span class="attribute">#[<span class="ident">no_mangle</span>]</span>
-<span class="kw">pub</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">alloc</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="number">1024</span>);
-    <span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">buf</span>.<span class="ident">as_mut_ptr</span>();
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">wasm_memory</span> {
+    <span class="doccomment">//! # Utilities for interacting with WASM&#39;s linear memory</span>
 
-    <span class="ident">mem::forget</span>(<span class="ident">buf</span>);
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::solution</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">ffi::CStr</span>, <span class="ident">ffi::CString</span>, <span class="ident">mem</span>, <span class="ident">os::raw::c_void</span>};
 
-    <span class="ident">ptr</span>
-}
+    <span class="doccomment">/// # Allocate memory in WebAssembly&#39;s linear memory and return its offset</span>
+    <span class="attribute">#[<span class="ident">no_mangle</span>]</span>
+    <span class="kw">pub</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">alloc</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="number">1024</span>);
+        <span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">buf</span>.<span class="ident">as_mut_ptr</span>();
 
-<span class="doccomment">/// # Deallocate memory in WebAssembly&#39;s linear memory at the offset located at `ptr`</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// No explicit calls to [std::mem::drop] are needed as [std::vec::Vec::from_raw_parts] takes ownership</span>
-<span class="doccomment">/// of the memory pointed at by `ptr`.</span>
-<span class="attribute">#[<span class="ident">no_mangle</span>]</span>
-<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">dealloc</span>(<span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>) {
-    <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Vec::from_raw_parts</span>(<span class="ident">ptr</span>, <span class="number">1024</span>, <span class="number">1024</span>);
-}
+        <span class="ident">mem::forget</span>(<span class="ident">buf</span>);
 
-<span class="attribute">#[<span class="ident">no_mangle</span>]</span>
-<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">make_me_monotone_crescendo</span>(<span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>) {
-    <span class="kw">let</span> <span class="ident">input</span> <span class="op">=</span> <span class="ident">CStr::from_ptr</span>(<span class="ident">ptr</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">i8</span>).<span class="ident">to_str</span>().<span class="ident">unwrap</span>();
-    <span class="kw">let</span> <span class="ident">flips</span> <span class="op">=</span> <span class="ident">monototone_crescendo_cumulative</span>(<span class="ident">input</span>);
-    <span class="kw">let</span> <span class="ident">answer</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;The minimum number of flips needed is: {}&quot;</span>, <span class="ident">flips</span>);
-
-    <span class="kw">let</span> <span class="ident">c_str</span> <span class="op">=</span> <span class="ident">CString::new</span>(<span class="ident">answer</span>).<span class="ident">unwrap</span>();
-    <span class="kw">let</span> <span class="ident">c_str_bytes</span> <span class="op">=</span> <span class="ident">c_str</span>.<span class="ident">as_bytes_with_nul</span>();
-
-    <span class="kw">let</span> <span class="ident">return_bytes</span> <span class="op">=</span> <span class="ident">std::slice::from_raw_parts_mut</span>(<span class="ident">ptr</span>, <span class="number">1024</span>);
-    <span class="ident">return_bytes</span>[..<span class="ident">c_str_bytes</span>.<span class="ident">len</span>()].<span class="ident">copy_from_slice</span>(<span class="ident">c_str_bytes</span>);
-}
-
-<span class="doccomment">/// # This is the [official solution][0] to [LeetCode problem #926][1]</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The solution was simply translated by me into rust from java.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ## Explanation</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// I find the explanation on LeetCode to this solution somewhat overcomplicated and hard to understand, so I will attempt</span>
-<span class="doccomment">/// to explain it (hopefully) a bit simpler here.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The first thing this solution does is calculate the [prefix sum][2] of every item in the string and store it in an array. So for example, if we had the string `11010`, the prefix sum array</span>
-<span class="doccomment">/// for that string would look like: `[0,1,2,2,3,3]`. This prefix sum array represents the the number of 1&#39;s that are present before the corresponding character index in the string.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This solution then works by looping through the given string and, for each character in the string, analyzing the string as two halves partioned</span>
-<span class="doccomment">/// at that character. The number of 1&#39;s in the first half are added to the number of 0&#39;s in the second half to determine the total number of flips</span>
-<span class="doccomment">/// needed to make the string monotone increasing for that location in the string.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// We get the number of 1&#39;s in the first half by looking up the corresponding index in the prefix sum array.</span>
-<span class="doccomment">/// We get the number of 0&#39;s in the second half by subtracting the number of 1&#39;s in the second half from the length</span>
-<span class="doccomment">/// of the second half.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// We then compare this number to the current minimum flips value and take the minimum of these two values again. The minimium</span>
-<span class="doccomment">/// we have in the end is what we return.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Note: the prefix sum array could also be optimized to remove the redundant element at index 0. The way the solution on LeetCode</span>
-<span class="doccomment">/// calculates the prefix sum array, the first element will always be zero. For example, if we had the string `11010`, the prefix sum array</span>
-<span class="doccomment">/// could be optimized to `[1,2,2,3,3]`. Apparently the official solution calculates the prefix sum array with the redundant zero at the beginning</span>
-<span class="doccomment">/// to [prevent some sort of possible overflow condition][3], out of principle more than anything else. See [monotone_crescendo_prefix_sums_without_redundant_zero] for an example.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// [0]: &lt;https://leetcode.com/problems/flip-string-to-monotone-increasing/solution/&gt;</span>
-<span class="doccomment">/// [1]: &lt;https://leetcode.com/problems/flip-string-to-monotone-increasing/&gt;</span>
-<span class="doccomment">/// [2]: &lt;https://en.wikipedia.org/wiki/Prefix_sum&gt;</span>
-<span class="doccomment">/// [3]: &lt;https://leetcode.com/problems/flip-string-to-monotone-increasing/solution/1047706&gt;</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">monotone_crescendo_prefix_sums</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
-    <span class="kw">let</span> <span class="ident">str_size</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">chars</span>().<span class="ident">count</span>() <span class="kw">as</span> <span class="ident">i32</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">prefix_sums</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0</span>; <span class="ident">str_size</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">+</span> <span class="number">1</span>];
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">min_flips</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="ident">i32::MAX</span>;
-
-    <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">char</span>) <span class="kw">in</span> <span class="ident">s</span>.<span class="ident">chars</span>().<span class="ident">enumerate</span>() {
-        <span class="ident">prefix_sums</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>] <span class="op">=</span> <span class="ident">prefix_sums</span>[<span class="ident">i</span>] <span class="op">+</span> (<span class="kw">if</span> <span class="ident">char</span> <span class="op">=</span><span class="op">=</span> <span class="string">&#39;1&#39;</span> { <span class="number">1</span> } <span class="kw">else</span> { <span class="number">0</span> });
+        <span class="ident">ptr</span>
     }
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">j</span> <span class="op">=</span> <span class="number">0</span>;
-
-    <span class="kw">while</span> <span class="ident">j</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">str_size</span> {
-        <span class="kw">let</span> <span class="ident">ones_before_j</span> <span class="op">=</span> <span class="ident">prefix_sums</span>[<span class="ident">j</span> <span class="kw">as</span> <span class="ident">usize</span>];
-        <span class="kw">let</span> <span class="ident">ones_after_j</span> <span class="op">=</span> <span class="ident">prefix_sums</span>[<span class="ident">str_size</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">-</span> <span class="ident">prefix_sums</span>[<span class="ident">j</span> <span class="kw">as</span> <span class="ident">usize</span>];
-
-        <span class="kw">let</span> <span class="ident">length_of_str_after_j</span> <span class="op">=</span> <span class="ident">str_size</span> <span class="op">-</span> <span class="ident">j</span>;
-        <span class="kw">let</span> <span class="ident">zeroes_after_j</span> <span class="op">=</span> <span class="ident">length_of_str_after_j</span> <span class="op">-</span> <span class="ident">ones_after_j</span>;
-
-        <span class="ident">min_flips</span> <span class="op">=</span> <span class="ident">min</span>(<span class="ident">min_flips</span>, <span class="ident">ones_before_j</span> <span class="op">+</span> <span class="ident">zeroes_after_j</span>);
-
-        <span class="macro">println!</span>(
-            <span class="string">&quot;min_flips: {:?}, j: {:?}, ones_before_j: {:?}, zeroes_after_j: {:?}&quot;</span>,
-            <span class="ident">min_flips</span>, <span class="ident">j</span>, <span class="ident">ones_before_j</span>, <span class="ident">zeroes_after_j</span>
-        );
-
-        <span class="ident">j</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+    <span class="doccomment">/// # Deallocate memory in WebAssembly&#39;s linear memory at the offset located at `ptr`</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// No explicit calls to [std::mem::drop] are needed as [std::vec::Vec::from_raw_parts] takes ownership</span>
+    <span class="doccomment">/// of the memory pointed at by `ptr`.</span>
+    <span class="attribute">#[<span class="ident">no_mangle</span>]</span>
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">dealloc</span>(<span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_void</span>) {
+        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Vec::from_raw_parts</span>(<span class="ident">ptr</span>, <span class="number">1024</span>, <span class="number">1024</span>);
     }
 
-    <span class="ident">min_flips</span>
+    <span class="attribute">#[<span class="ident">no_mangle</span>]</span>
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">make_me_monotone_crescendo</span>(<span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>) {
+        <span class="kw">let</span> <span class="ident">input</span> <span class="op">=</span> <span class="ident">CStr::from_ptr</span>(<span class="ident">ptr</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">i8</span>).<span class="ident">to_str</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">flips</span> <span class="op">=</span> <span class="ident">monototone_crescendo_cumulative</span>(<span class="ident">input</span>);
+        <span class="kw">let</span> <span class="ident">answer</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;The minimum number of flips needed is: {}&quot;</span>, <span class="ident">flips</span>);
+
+        <span class="kw">let</span> <span class="ident">c_str</span> <span class="op">=</span> <span class="ident">CString::new</span>(<span class="ident">answer</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">c_str_bytes</span> <span class="op">=</span> <span class="ident">c_str</span>.<span class="ident">as_bytes_with_nul</span>();
+
+        <span class="kw">let</span> <span class="ident">return_bytes</span> <span class="op">=</span> <span class="ident">std::slice::from_raw_parts_mut</span>(<span class="ident">ptr</span>, <span class="number">1024</span>);
+        <span class="ident">return_bytes</span>[..<span class="ident">c_str_bytes</span>.<span class="ident">len</span>()].<span class="ident">copy_from_slice</span>(<span class="ident">c_str_bytes</span>);
+    }
 }
 
-<span class="doccomment">/// # Essentially the same solution as [monotone_crescendo_prefix_sums] except without the redundant leading zero in the prefix sum array</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This function also utilizes [u8]&#39;s instead of [i32]&#39;s.</span>
-<span class="doccomment">/// This could have also been done in [monotone_crescendo_prefix_sums] as our input will always lead to positive prefix sums and a positive</span>
-<span class="doccomment">/// return value which should all be less than or equal to 255. The only reason [monotone_crescendo_prefix_sums] uses [i32]&#39;s is that I made an</span>
-<span class="doccomment">/// arbitrary choice to do so, and when removing the redundant zero I thought about it a bit more and realized [u8]&#39;s would be fine.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">monotone_crescendo_prefix_sums_without_redundant_zero</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
-    <span class="kw">let</span> <span class="ident">str_size</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">chars</span>().<span class="ident">count</span>();
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">prefix_sums</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">str_size</span>);
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">min_flips</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="ident">u8::MAX</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">solution</span> {
+    <span class="doccomment">//! # Implementations of the monotone increasing problem</span>
 
-    <span class="macro">println!</span>(<span class="string">&quot;min_flips: {:?}&quot;</span>, <span class="ident">min_flips</span>);
+    <span class="kw">use</span> <span class="ident">std::cmp::min</span>;
+    <span class="doccomment">/// # This is the [official solution][0] to [LeetCode problem #926][1]</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The solution was simply translated by me into rust from java.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ## Explanation</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// I find the explanation on LeetCode to this solution somewhat overcomplicated and hard to understand, so I will attempt</span>
+    <span class="doccomment">/// to explain it (hopefully) a bit simpler here.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The first thing this solution does is calculate the [prefix sum][2] of every item in the string and store it in an array. So for example, if we had the string `11010`, the prefix sum array</span>
+    <span class="doccomment">/// for that string would look like: `[0,1,2,2,3,3]`. This prefix sum array represents the the number of 1&#39;s that are present before the corresponding character index in the string.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This solution then works by looping through the given string and, for each character in the string, analyzing the string as two halves partioned</span>
+    <span class="doccomment">/// at that character. The number of 1&#39;s in the first half are added to the number of 0&#39;s in the second half to determine the total number of flips</span>
+    <span class="doccomment">/// needed to make the string monotone increasing for that location in the string.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// We get the number of 1&#39;s in the first half by looking up the corresponding index in the prefix sum array.</span>
+    <span class="doccomment">/// We get the number of 0&#39;s in the second half by subtracting the number of 1&#39;s in the second half from the length</span>
+    <span class="doccomment">/// of the second half.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// We then compare this number to the current minimum flips value and take the minimum of these two values again. The minimium</span>
+    <span class="doccomment">/// we have in the end is what we return.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Note: the prefix sum array could also be optimized to remove the redundant element at index 0. The way the solution on LeetCode</span>
+    <span class="doccomment">/// calculates the prefix sum array, the first element will always be zero. For example, if we had the string `11010`, the prefix sum array</span>
+    <span class="doccomment">/// could be optimized to `[1,2,2,3,3]`. Apparently the official solution calculates the prefix sum array with the redundant zero at the beginning</span>
+    <span class="doccomment">/// to [prevent some sort of possible overflow condition][3], out of principle more than anything else. See [monotone_crescendo_prefix_sums_without_redundant_zero] for an example.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// [0]: &lt;https://leetcode.com/problems/flip-string-to-monotone-increasing/solution/&gt;</span>
+    <span class="doccomment">/// [1]: &lt;https://leetcode.com/problems/flip-string-to-monotone-increasing/&gt;</span>
+    <span class="doccomment">/// [2]: &lt;https://en.wikipedia.org/wiki/Prefix_sum&gt;</span>
+    <span class="doccomment">/// [3]: &lt;https://leetcode.com/problems/flip-string-to-monotone-increasing/solution/1047706&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">monotone_crescendo_prefix_sums</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+        <span class="kw">let</span> <span class="ident">str_size</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">chars</span>().<span class="ident">count</span>() <span class="kw">as</span> <span class="ident">i32</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">prefix_sums</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0</span>; <span class="ident">str_size</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">+</span> <span class="number">1</span>];
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">min_flips</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="ident">i32::MAX</span>;
 
-    <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">char</span>) <span class="kw">in</span> <span class="ident">s</span>.<span class="ident">chars</span>().<span class="ident">enumerate</span>() {
-        <span class="kw">let</span> <span class="ident">num</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">char</span> {
-            <span class="string">&#39;1&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">1</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
-        };
-        <span class="kw">if</span> <span class="ident">i</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
-            <span class="ident">prefix_sums</span>.<span class="ident">push</span>(<span class="ident">num</span>);
-            <span class="kw">continue</span>;
+        <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">char</span>) <span class="kw">in</span> <span class="ident">s</span>.<span class="ident">chars</span>().<span class="ident">enumerate</span>() {
+            <span class="ident">prefix_sums</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>] <span class="op">=</span> <span class="ident">prefix_sums</span>[<span class="ident">i</span>] <span class="op">+</span> (<span class="kw">if</span> <span class="ident">char</span> <span class="op">=</span><span class="op">=</span> <span class="string">&#39;1&#39;</span> { <span class="number">1</span> } <span class="kw">else</span> { <span class="number">0</span> });
         }
 
-        <span class="ident">prefix_sums</span>.<span class="ident">push</span>(<span class="ident">prefix_sums</span>.<span class="ident">get</span>(<span class="ident">i</span> <span class="op">-</span> <span class="number">1</span>).<span class="ident">unwrap</span>() <span class="op">+</span> <span class="ident">num</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">j</span> <span class="op">=</span> <span class="number">0</span>;
+
+        <span class="kw">while</span> <span class="ident">j</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">str_size</span> {
+            <span class="kw">let</span> <span class="ident">ones_before_j</span> <span class="op">=</span> <span class="ident">prefix_sums</span>[<span class="ident">j</span> <span class="kw">as</span> <span class="ident">usize</span>];
+            <span class="kw">let</span> <span class="ident">ones_after_j</span> <span class="op">=</span> <span class="ident">prefix_sums</span>[<span class="ident">str_size</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">-</span> <span class="ident">prefix_sums</span>[<span class="ident">j</span> <span class="kw">as</span> <span class="ident">usize</span>];
+
+            <span class="kw">let</span> <span class="ident">length_of_str_after_j</span> <span class="op">=</span> <span class="ident">str_size</span> <span class="op">-</span> <span class="ident">j</span>;
+            <span class="kw">let</span> <span class="ident">zeroes_after_j</span> <span class="op">=</span> <span class="ident">length_of_str_after_j</span> <span class="op">-</span> <span class="ident">ones_after_j</span>;
+
+            <span class="ident">min_flips</span> <span class="op">=</span> <span class="ident">min</span>(<span class="ident">min_flips</span>, <span class="ident">ones_before_j</span> <span class="op">+</span> <span class="ident">zeroes_after_j</span>);
+
+            <span class="macro">println!</span>(
+                <span class="string">&quot;min_flips: {:?}, j: {:?}, ones_before_j: {:?}, zeroes_after_j: {:?}&quot;</span>,
+                <span class="ident">min_flips</span>, <span class="ident">j</span>, <span class="ident">ones_before_j</span>, <span class="ident">zeroes_after_j</span>
+            );
+
+            <span class="ident">j</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+        }
+
+        <span class="ident">min_flips</span>
     }
 
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">j</span> <span class="op">=</span> <span class="number">0</span>;
+    <span class="doccomment">/// # Essentially the same solution as [monotone_crescendo_prefix_sums] except without the redundant leading zero in the prefix sum array</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This function also utilizes [u8]&#39;s instead of [i32]&#39;s.</span>
+    <span class="doccomment">/// This could have also been done in [monotone_crescendo_prefix_sums] as our input will always lead to positive prefix sums and a positive</span>
+    <span class="doccomment">/// return value which should all be less than or equal to 255. The only reason [monotone_crescendo_prefix_sums] uses [i32]&#39;s is that I made an</span>
+    <span class="doccomment">/// arbitrary choice to do so, and when removing the redundant zero I thought about it a bit more and realized [u8]&#39;s would be fine.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">monotone_crescendo_prefix_sums_without_redundant_zero</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+        <span class="kw">let</span> <span class="ident">str_size</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">chars</span>().<span class="ident">count</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">prefix_sums</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">str_size</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">min_flips</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="ident">u8::MAX</span>;
 
-    <span class="kw">while</span> <span class="ident">j</span> <span class="op">&lt;</span> <span class="ident">str_size</span> {
-        <span class="kw">let</span> <span class="ident">ones_before_j</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">j</span> {
-            <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">prefix_sums</span>[<span class="ident">j</span>],
-        };
-        <span class="kw">let</span> <span class="ident">ones_after_j</span> <span class="op">=</span> <span class="ident">prefix_sums</span>[<span class="ident">str_size</span> <span class="op">-</span> <span class="number">1</span>] <span class="op">-</span> <span class="ident">prefix_sums</span>[<span class="ident">j</span>];
+        <span class="macro">println!</span>(<span class="string">&quot;min_flips: {:?}&quot;</span>, <span class="ident">min_flips</span>);
 
-        <span class="kw">let</span> <span class="ident">length_of_str_after_j</span> <span class="op">=</span> (<span class="ident">str_size</span> <span class="op">-</span> <span class="number">1</span> <span class="op">-</span> <span class="ident">j</span>) <span class="kw">as</span> <span class="ident">u8</span>;
-        <span class="kw">let</span> <span class="ident">zeroes_after_j</span> <span class="op">=</span> <span class="ident">length_of_str_after_j</span> <span class="op">-</span> <span class="ident">ones_after_j</span>;
+        <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">char</span>) <span class="kw">in</span> <span class="ident">s</span>.<span class="ident">chars</span>().<span class="ident">enumerate</span>() {
+            <span class="kw">let</span> <span class="ident">num</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">char</span> {
+                <span class="string">&#39;1&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">1</span>,
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
+            };
+            <span class="kw">if</span> <span class="ident">i</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+                <span class="ident">prefix_sums</span>.<span class="ident">push</span>(<span class="ident">num</span>);
+                <span class="kw">continue</span>;
+            }
 
-        <span class="ident">min_flips</span> <span class="op">=</span> <span class="ident">min</span>(<span class="ident">min_flips</span>, <span class="ident">ones_before_j</span> <span class="op">+</span> <span class="ident">zeroes_after_j</span>);
+            <span class="ident">prefix_sums</span>.<span class="ident">push</span>(<span class="ident">prefix_sums</span>.<span class="ident">get</span>(<span class="ident">i</span> <span class="op">-</span> <span class="number">1</span>).<span class="ident">unwrap</span>() <span class="op">+</span> <span class="ident">num</span>);
+        }
 
-        <span class="macro">println!</span>(
-            <span class="string">&quot;min_flips: {:?}, j: {:?}, ones_before_j: {:?}, zeroes_after_j: {:?}&quot;</span>,
-            <span class="ident">min_flips</span>, <span class="ident">j</span>, <span class="ident">ones_before_j</span>, <span class="ident">zeroes_after_j</span>
-        );
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">j</span> <span class="op">=</span> <span class="number">0</span>;
 
-        <span class="ident">j</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+        <span class="kw">while</span> <span class="ident">j</span> <span class="op">&lt;</span> <span class="ident">str_size</span> {
+            <span class="kw">let</span> <span class="ident">ones_before_j</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">j</span> {
+                <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">prefix_sums</span>[<span class="ident">j</span>],
+            };
+            <span class="kw">let</span> <span class="ident">ones_after_j</span> <span class="op">=</span> <span class="ident">prefix_sums</span>[<span class="ident">str_size</span> <span class="op">-</span> <span class="number">1</span>] <span class="op">-</span> <span class="ident">prefix_sums</span>[<span class="ident">j</span>];
+
+            <span class="kw">let</span> <span class="ident">length_of_str_after_j</span> <span class="op">=</span> (<span class="ident">str_size</span> <span class="op">-</span> <span class="number">1</span> <span class="op">-</span> <span class="ident">j</span>) <span class="kw">as</span> <span class="ident">u8</span>;
+            <span class="kw">let</span> <span class="ident">zeroes_after_j</span> <span class="op">=</span> <span class="ident">length_of_str_after_j</span> <span class="op">-</span> <span class="ident">ones_after_j</span>;
+
+            <span class="ident">min_flips</span> <span class="op">=</span> <span class="ident">min</span>(<span class="ident">min_flips</span>, <span class="ident">ones_before_j</span> <span class="op">+</span> <span class="ident">zeroes_after_j</span>);
+
+            <span class="macro">println!</span>(
+                <span class="string">&quot;min_flips: {:?}, j: {:?}, ones_before_j: {:?}, zeroes_after_j: {:?}&quot;</span>,
+                <span class="ident">min_flips</span>, <span class="ident">j</span>, <span class="ident">ones_before_j</span>, <span class="ident">zeroes_after_j</span>
+            );
+
+            <span class="ident">j</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+        }
+
+        <span class="ident">min_flips</span>
     }
 
-    <span class="ident">min_flips</span>
-}
+    <span class="doccomment">/// # This is an ingenious solution which was [contributed][0] by LeetCode user [tarunbisht][1] and translated to Rust by me</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ## Explanation</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This solution works by keeping a running total of all ones and all zeroes, where the count of zeroes is initlally contained in the variable `flips`.</span>
+    <span class="doccomment">/// The variable `flips` is then set to the minimum value of the running total of zeroes or running total of ones.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Overall this solution is not only simpler to understand, at least for me, but also requires only O(1) space as opposed to O(N) space.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// [0]: &lt;https://leetcode.com/problems/flip-string-to-monotone-increasing/solution/725259&gt;</span>
+    <span class="doccomment">/// [1]: &lt;https://leetcode.com/tarunbisht&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">monototone_crescendo_cumulative</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ones</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">flips</span> <span class="op">=</span> <span class="number">0</span>;
 
-<span class="doccomment">/// # This is an ingenious solution which was [contributed][0] by LeetCode user [tarunbisht][1] and translated to Rust by me</span>
-<span class="doccomment">/// </span>
-<span class="doccomment">/// ## Explanation</span>
-<span class="doccomment">/// </span>
-<span class="doccomment">/// This solution works by keeping a running total of all ones and all zeroes, where the count of zeroes is initlally contained in the variable `flips`.</span>
-<span class="doccomment">/// The variable `flips` is then set to the minimum value of the running total of zeroes or running total of ones.</span>
-<span class="doccomment">/// </span>
-<span class="doccomment">/// Overall this solution is not only simpler to understand, at least for me, but also requires only O(1) space as opposed to O(N) space.</span>
-<span class="doccomment">/// </span>
-<span class="doccomment">/// [0]: &lt;https://leetcode.com/problems/flip-string-to-monotone-increasing/solution/725259&gt;</span>
-<span class="doccomment">/// [1]: &lt;https://leetcode.com/tarunbisht&gt;</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">monototone_crescendo_cumulative</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">i32</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ones</span> <span class="op">=</span> <span class="number">0</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">flips</span> <span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">for</span> <span class="ident">char</span> <span class="kw">in</span> <span class="ident">s</span>.<span class="ident">chars</span>() {
+            <span class="kw">match</span> <span class="ident">char</span> {
+                <span class="string">&#39;1&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ones</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">flips</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
+            };
 
-    <span class="kw">for</span> <span class="ident">char</span> <span class="kw">in</span> <span class="ident">s</span>.<span class="ident">chars</span>() {
-        <span class="kw">match</span> <span class="ident">char</span> {
-            <span class="string">&#39;1&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ones</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">flips</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>,
-        };
+            <span class="ident">flips</span> <span class="op">=</span> <span class="ident">min</span>(<span class="ident">ones</span>, <span class="ident">flips</span>);
+        }
 
-        <span class="ident">flips</span> <span class="op">=</span> <span class="ident">min</span>(<span class="ident">ones</span>, <span class="ident">flips</span>);
+        <span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">flips</span>);
+
+        <span class="ident">flips</span>
     }
-
-    <span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">flips</span>);
-
-    <span class="ident">flips</span>
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="monotone_crescendo" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
