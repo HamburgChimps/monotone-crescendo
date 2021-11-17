@@ -1,7 +1,7 @@
 //! A library for calculating the least number of flips needed to make a binary string monotone increasing.
 //! Also contains utility functions for allocating webassembly memory and returning a pointer to it, as well
 //! as deallocating said memory. It also contains a function that can be called via WebAssembly, and thus Javascript.
-use std::{cmp::min, ffi::CStr, ffi::CString, i32::MAX, mem, os::raw::c_void};
+use std::{cmp::min, ffi::CStr, ffi::CString, mem, os::raw::c_void};
 
 #[cfg(test)]
 mod tests {
@@ -10,6 +10,11 @@ mod tests {
     #[test]
     fn test_with_prefix_sums() {
         assert_eq!(monotone_crescendo_prefix_sums("11010"), 2);
+    }
+
+    #[test]
+    fn test_with_prefix_sums_without_redundant_zero() {
+        assert_eq!(monotone_crescendo_prefix_sums_without_redundant_zero("11010"), 2);
     }
 
     #[test]
@@ -65,14 +70,14 @@ pub unsafe extern "C" fn make_me_monotone_crescendo(ptr: *mut u8) {
 /// We get the number of 1's in the first half by looking up the corresponding index in the prefix sum array.
 /// We get the number of 0's in the second half by subtracting the number of 1's in the second half from the length
 /// of the second half.
-/// 
+///
 /// We then compare this number to the current minimum flips value and take the minimum of these two values again. The minimium
 /// we have in the end is what we return.
-/// 
+///
 /// Note: the prefix sum array could also be optimized to remove the redundant element at index 0. The way the solution on LeetCode
 /// calculates the prefix sum array, the first element will always be zero. For example, if we had the string `11010`, the prefix sum array
 /// could be optimized to `[1,2,2,3,3]`. Apparently the official solution calculates the prefix sum array with the redundant zero at the beginning
-/// to [prevent some sort of possible overflow condition][3], out of principle more than anything else.
+/// to [prevent some sort of possible overflow condition][3], out of principle more than anything else. See [monotone_crescendo_prefix_sums_without_redundant_zero] for an example.
 ///
 /// [0]: <https://leetcode.com/problems/flip-string-to-monotone-increasing/solution/>
 /// [1]: <https://leetcode.com/problems/flip-string-to-monotone-increasing/>
@@ -81,7 +86,7 @@ pub unsafe extern "C" fn make_me_monotone_crescendo(ptr: *mut u8) {
 pub fn monotone_crescendo_prefix_sums(s: &str) -> i32 {
     let str_size = s.chars().count() as i32;
     let mut prefix_sums = vec![0; str_size as usize + 1];
-    let mut min_flips: i32 = MAX;
+    let mut min_flips: i32 = i32::MAX;
 
     for (i, char) in s.chars().enumerate() {
         prefix_sums[i + 1] = prefix_sums[i] + (if char == '1' { 1 } else { 0 });
@@ -94,6 +99,52 @@ pub fn monotone_crescendo_prefix_sums(s: &str) -> i32 {
         let ones_after_j = prefix_sums[str_size as usize] - prefix_sums[j as usize];
 
         let length_of_str_after_j = str_size - j;
+        let zeroes_after_j = length_of_str_after_j - ones_after_j;
+
+        min_flips = min(min_flips, ones_before_j + zeroes_after_j);
+
+        println!(
+            "min_flips: {:?}, j: {:?}, ones_before_j: {:?}, zeroes_after_j: {:?}",
+            min_flips, j, ones_before_j, zeroes_after_j
+        );
+
+        j += 1;
+    }
+
+    min_flips
+}
+
+/// # Essentially the same solution as [monotone_crescendo_prefix_sums] except without the redundant leading zero in the prefix sum array
+/// 
+/// This function also utilizes [u8]'s instead of [i32]'s. Our input will always lead to positive prefix sums and a positive return value.
+pub fn monotone_crescendo_prefix_sums_without_redundant_zero(s: &str) -> u8 {
+    let str_size = s.chars().count();
+    let mut prefix_sums: Vec<u8> = Vec::with_capacity(str_size);
+    let mut min_flips: u8 = u8::MAX;
+
+    for (i, char) in s.chars().enumerate() {
+        let num = match char {
+            '1' => 1,
+            _ => 0,
+        };
+        if i == 0 {
+            prefix_sums.push(num);
+            continue;
+        }
+
+        prefix_sums.push(prefix_sums.get(i - 1).unwrap() + num);
+    }
+
+    let mut j = 0;
+
+    while j < str_size {
+        let ones_before_j = match j {
+            0 => 0,
+            _ => prefix_sums[j]
+        };
+        let ones_after_j = prefix_sums[str_size - 1] - prefix_sums[j];
+
+        let length_of_str_after_j = (str_size - 1 - j) as u8;
         let zeroes_after_j = length_of_str_after_j - ones_after_j;
 
         min_flips = min(min_flips, ones_before_j + zeroes_after_j);
