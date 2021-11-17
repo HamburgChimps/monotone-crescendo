@@ -124,11 +124,16 @@ pub fn monotone_crescendo_prefix_sums(s: &str) -> i32 {
 
 /// # Essentially the same solution as [monotone_crescendo_prefix_sums] except without the redundant leading zero in the prefix sum array
 ///
-/// This function also utilizes [u8]'s instead of [i32]'s. Our input will always lead to positive prefix sums and a positive return value.
+/// This function also utilizes [u8]'s instead of [i32]'s.
+/// This could have also been done in [monotone_crescendo_prefix_sums] as our input will always lead to positive prefix sums and a positive
+/// return value which should all be less than or equal to 255. The only reason [monotone_crescendo_prefix_sums] uses [i32]'s is that I made an
+/// arbitrary choice to do so, and when removing the redundant zero I thought about it a bit more and realized [u8]'s would be fine.
 pub fn monotone_crescendo_prefix_sums_without_redundant_zero(s: &str) -> u8 {
     let str_size = s.chars().count();
     let mut prefix_sums: Vec<u8> = Vec::with_capacity(str_size);
     let mut min_flips: u8 = u8::MAX;
+
+    println!("min_flips: {:?}", min_flips);
 
     for (i, char) in s.chars().enumerate() {
         let num = match char {
