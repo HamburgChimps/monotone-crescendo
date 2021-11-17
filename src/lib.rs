@@ -14,7 +14,10 @@ mod tests {
 
     #[test]
     fn test_with_prefix_sums_without_redundant_zero() {
-        assert_eq!(monotone_crescendo_prefix_sums_without_redundant_zero("11010"), 2);
+        assert_eq!(
+            monotone_crescendo_prefix_sums_without_redundant_zero("11010"),
+            2
+        );
     }
 
     #[test]
@@ -23,6 +26,7 @@ mod tests {
     }
 }
 
+/// # Allocate memory in WebAssembly's linear memory and return its offset
 #[no_mangle]
 pub extern "C" fn alloc() -> *mut c_void {
     let mut buf = Vec::with_capacity(1024);
@@ -33,9 +37,13 @@ pub extern "C" fn alloc() -> *mut c_void {
     ptr
 }
 
+/// # Deallocate memory in WebAssembly's linear memory at the offset located at `ptr`
+///
+/// No explicit calls to [std::mem::drop] are needed as [std::vec::Vec::from_raw_parts] takes ownership
+/// of the memory pointed at by `ptr`.
 #[no_mangle]
-pub unsafe extern "C" fn dealloc(ptr: *mut c_void, size: usize) {
-    let _ = Vec::from_raw_parts(ptr, size, size);
+pub unsafe extern "C" fn dealloc(ptr: *mut c_void) {
+    let _ = Vec::from_raw_parts(ptr, 1024, 1024);
 }
 
 #[no_mangle]
@@ -115,7 +123,7 @@ pub fn monotone_crescendo_prefix_sums(s: &str) -> i32 {
 }
 
 /// # Essentially the same solution as [monotone_crescendo_prefix_sums] except without the redundant leading zero in the prefix sum array
-/// 
+///
 /// This function also utilizes [u8]'s instead of [i32]'s. Our input will always lead to positive prefix sums and a positive return value.
 pub fn monotone_crescendo_prefix_sums_without_redundant_zero(s: &str) -> u8 {
     let str_size = s.chars().count();
@@ -140,7 +148,7 @@ pub fn monotone_crescendo_prefix_sums_without_redundant_zero(s: &str) -> u8 {
     while j < str_size {
         let ones_before_j = match j {
             0 => 0,
-            _ => prefix_sums[j]
+            _ => prefix_sums[j],
         };
         let ones_after_j = prefix_sums[str_size - 1] - prefix_sums[j];
 
