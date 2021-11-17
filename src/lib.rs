@@ -21,8 +21,8 @@ mod tests {
     }
 
     #[test]
-    fn test() {
-        assert_eq!(monototone_crescendo("11010"), 2);
+    fn test_cumulative() {
+        assert_eq!(monototone_crescendo_cumulative("11010"), 2);
     }
 }
 
@@ -49,7 +49,7 @@ pub unsafe extern "C" fn dealloc(ptr: *mut c_void) {
 #[no_mangle]
 pub unsafe extern "C" fn make_me_monotone_crescendo(ptr: *mut u8) {
     let input = CStr::from_ptr(ptr as *const i8).to_str().unwrap();
-    let flips = monototone_crescendo(input);
+    let flips = monototone_crescendo_cumulative(input);
     let answer = format!("The minimum number of flips needed is: {}", flips);
 
     let c_str = CString::new(answer).unwrap();
@@ -173,7 +173,18 @@ pub fn monotone_crescendo_prefix_sums_without_redundant_zero(s: &str) -> u8 {
     min_flips
 }
 
-pub fn monototone_crescendo(s: &str) -> i32 {
+/// # This is an ingenious solution which was [contributed][0] by LeetCode user [tarunbisht][1] and translated to Rust by me
+/// 
+/// ## Explanation
+/// 
+/// This solution works by keeping a running total of all ones and all zeroes, where the count of zeroes is initlally contained in the variable `flips`.
+/// The variable `flips` is then set to the minimum value of the running total of zeroes or running total of ones.
+/// 
+/// Overall this solution is not only simpler to understand, at least for me, but also requires only O(1) space as opposed to O(N) space.
+/// 
+/// [0]: <https://leetcode.com/problems/flip-string-to-monotone-increasing/solution/725259>
+/// [1]: <https://leetcode.com/tarunbisht>
+pub fn monototone_crescendo_cumulative(s: &str) -> i32 {
     let mut ones = 0;
     let mut flips = 0;
 
