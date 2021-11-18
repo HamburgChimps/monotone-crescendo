@@ -4,7 +4,7 @@ Rust implementations of [LeetCode problem #926](https://leetcode.com/problems/fl
 
 [See a working demo](https://hamburgchimps.github.io/monotone-crescendo/).
 
-## How To Try It Out Locally
+## Try It Out Locally
 
 1. Clone this repository onto your machine.
 2. Install [`wasm-gc`](https://github.com/alexcrichton/wasm-gc) by running `cargo install wasm-gc`. This is used by [` build-demo.sh`](build-demo.sh) to reduce the size of the compiled wasm binary by removing unneccesary/unused cruft. Even
