@@ -16,7 +16,7 @@ though the `wasm-gc` project itself says you shouldn't use it in most cases, it 
    cd demo/
    python -m SimpleHTTPServer
    ```
-   The demo will then be available at <`localhost:8000`>.
+   The demo will then be available at `<http://localhost:8000>`.
 
 
 ## Crate Documentation
