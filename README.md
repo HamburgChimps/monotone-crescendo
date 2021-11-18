@@ -4,7 +4,15 @@ Rust implementations of [LeetCode problem #926](https://leetcode.com/problems/fl
 
 [See a working demo](https://hamburgchimps.github.io/monotone-crescendo/).
 
-## Documentation
+## How To Try It Out Locally
+
+1. Clone this repository onto your machine.
+
+2. Install [`wasm-gc`](https://github.com/alexcrichton/wasm-gc) by running `cargo install wasm-gc`. This is used by [` build-demo.sh`](build-demo.sh) to reduce the size of the compiled wasm binary by removing unneccesary/unused cruft. Even
+though the project itself says you shouldn't use it in most cases, it still seems to get the wasm file the smallest. I tried using the `--gc-sections` flag in the compiler options and `wasm-gc` still got it smaller. I am not making use of [`wasm-bindgen`](https://github.com/rustwasm/wasm-bindgen)) or [`wasm-pack`](https://github.com/rustwasm/wasm-pack) in this project, which both attempt to remove cruft when compiling, so I utilized `wasm-gc` to do it manually.
+
+
+## Crate Documentation
 
 Detailed documnetation generated via [rustdoc](https://doc.rust-lang.org/rustdoc/index.html) can be found [alongside the demo](https://hamburgchimps.github.io/monotone-crescendo/doc/monotone_crescendo).
 
