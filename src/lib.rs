@@ -71,7 +71,7 @@ pub mod wasm_memory {
             _ => -1,
         };
         let answer = match flips {
-            -1 => format!("Solution name {} does not exist", solution_name),
+            -1 => format!("Solution name \"{}\" does not exist", solution_name),
             _ => format!("The minimum number of flips needed is: {}", flips),
         };
 
