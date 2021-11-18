@@ -19,6 +19,6 @@ These two blog posts from Dr. Apodaca were most helpful:
 
 Further credit goes to [Radu Matei](https://radu-matei.com) and his [blog post](https://radu-matei.com/blog/practical-guide-to-wasm-memory), which helped me build upon the concepts I learned from Dr. Apodaca's posts.
 
-The prefix sum solution is the [official solution on LeetCode](https://leetcode.com/problems/flip-string-to-monotone-increasing/solution/), I only translated it into Rust.
+The [prefix sum solution](https://hamburgchimps.github.io/monotone-crescendo/doc/monotone_crescendo/solution/fn.monotone_crescendo_prefix_sums.html) is the [official solution on LeetCode](https://leetcode.com/problems/flip-string-to-monotone-increasing/solution/), I only translated it into Rust.
 
-The cumulative solution was [posted to LeetCode](https://leetcode.com/problems/flip-string-to-monotone-increasing/solution/725259) by [tarunbisht](https://leetcode.com/tarunbisht), and was translated into Rust by me.
+The [cumulative solution](https://hamburgchimps.github.io/monotone-crescendo/doc/monotone_crescendo/solution/fn.monototone_crescendo_cumulative.html) was [posted to LeetCode](https://leetcode.com/problems/flip-string-to-monotone-increasing/solution/725259) by [tarunbisht](https://leetcode.com/tarunbisht), and was translated into Rust by me.
