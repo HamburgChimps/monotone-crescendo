@@ -8,9 +8,19 @@
     :root {
       --bg-color: #0f1419;
       --text-color: #c5c5c5;
+      --answer-color: #ffb44c;
+    }
+
+    body,
+    html {
+      height: 100%;
     }
 
     body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       background: var(--bg-color);
       color: var(--text-color);
       font: 16px/1.4 "Source Serif 4", "Noto Sans KR", serif;
@@ -22,7 +32,7 @@
     }
 
     h3 {
-      color: #ffb44c;
+      color: var(--answer-color);
     }
 
     div {
