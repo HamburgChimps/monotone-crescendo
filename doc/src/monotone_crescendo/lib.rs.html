@@ -212,6 +212,24 @@
 <span id="212">212</span>
 <span id="213">213</span>
 <span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A library for calculating the least number of flips needed to make a binary string monotone increasing.</span>
 <span class="doccomment">//! Also contains utility functions for allocating WebAssembly linear memory and returning a pointer to it, as well</span>
 <span class="doccomment">//! as deallocating said memory. It also contains a function that can be called via WebAssembly, and thus Javascript.</span>
@@ -265,16 +283,34 @@
         <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Vec::from_raw_parts</span>(<span class="ident">ptr</span>, <span class="number">1024</span>, <span class="number">1024</span>);
     }
 
+    <span class="doccomment">/// # Call the specified [solution][super::solution] method with the given input</span>
     <span class="attribute">#[<span class="ident">no_mangle</span>]</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">make_me_monotone_crescendo</span>(<span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>) {
-        <span class="kw">let</span> <span class="ident">input</span> <span class="op">=</span> <span class="ident">CStr::from_ptr</span>(<span class="ident">ptr</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">i8</span>).<span class="ident">to_str</span>().<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">flips</span> <span class="op">=</span> <span class="ident">monototone_crescendo_cumulative</span>(<span class="ident">input</span>);
-        <span class="kw">let</span> <span class="ident">answer</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;The minimum number of flips needed is: {}&quot;</span>, <span class="ident">flips</span>);
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">call_solution_with_input</span>(
+        <span class="ident">solution_name_ptr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>,
+        <span class="ident">input_ptr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>,
+    ) {
+        <span class="kw">let</span> <span class="ident">solution_name</span> <span class="op">=</span> <span class="ident">CStr::from_ptr</span>(<span class="ident">solution_name_ptr</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">i8</span>)
+            .<span class="ident">to_str</span>()
+            .<span class="ident">unwrap</span>();
+
+        <span class="kw">let</span> <span class="ident">input</span> <span class="op">=</span> <span class="ident">CStr::from_ptr</span>(<span class="ident">input_ptr</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">i8</span>).<span class="ident">to_str</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">flips</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">solution_name</span> {
+            <span class="string">&quot;Prefix Sums&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">monotone_crescendo_prefix_sums</span>(<span class="ident">input</span>),
+            <span class="string">&quot;Cumulative&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">monototone_crescendo_cumulative</span>(<span class="ident">input</span>),
+            <span class="string">&quot;Prefix Sums w/o Redundant Zero&quot;</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">monotone_crescendo_prefix_sums_without_redundant_zero</span>(<span class="ident">input</span>) <span class="kw">as</span> <span class="ident">i32</span>
+            }
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="op">-</span><span class="number">1</span>,
+        };
+        <span class="kw">let</span> <span class="ident">answer</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">flips</span> {
+            <span class="op">-</span><span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;Solution name {} does not exist&quot;</span>, <span class="ident">solution_name</span>),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;The minimum number of flips needed is: {}&quot;</span>, <span class="ident">flips</span>),
+        };
 
         <span class="kw">let</span> <span class="ident">c_str</span> <span class="op">=</span> <span class="ident">CString::new</span>(<span class="ident">answer</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">c_str_bytes</span> <span class="op">=</span> <span class="ident">c_str</span>.<span class="ident">as_bytes_with_nul</span>();
 
-        <span class="kw">let</span> <span class="ident">return_bytes</span> <span class="op">=</span> <span class="ident">std::slice::from_raw_parts_mut</span>(<span class="ident">ptr</span>, <span class="number">1024</span>);
+        <span class="kw">let</span> <span class="ident">return_bytes</span> <span class="op">=</span> <span class="ident">std::slice::from_raw_parts_mut</span>(<span class="ident">input_ptr</span>, <span class="number">1024</span>);
         <span class="ident">return_bytes</span>[..<span class="ident">c_str_bytes</span>.<span class="ident">len</span>()].<span class="ident">copy_from_slice</span>(<span class="ident">c_str_bytes</span>);
     }
 }

@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["alloc","Allocate memory in WebAssembly’s linear memory and return its offset"],["dealloc","Deallocate memory in WebAssembly’s linear memory at the offset located at `ptr`"],["make_me_monotone_crescendo",""]]});
+initSidebarItems({"fn":[["alloc","Allocate memory in WebAssembly’s linear memory and return its offset"],["call_solution_with_input","Call the specified [solution][super::solution] method with the given input"],["dealloc","Deallocate memory in WebAssembly’s linear memory at the offset located at `ptr`"]]});
