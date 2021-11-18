@@ -9,6 +9,13 @@ Rust implementations of [LeetCode problem #926](https://leetcode.com/problems/fl
 1. Clone this repository onto your machine.
 2. Install [`wasm-gc`](https://github.com/alexcrichton/wasm-gc) by running `cargo install wasm-gc`. This is used by [` build-demo.sh`](build-demo.sh) to reduce the size of the compiled wasm binary by removing unneccesary/unused cruft. Even
 though the `wasm-gc` project itself says you shouldn't use it in most cases, it still seems to get the wasm file the smallest. I tried using the `--gc-sections` flag in the compiler options and `wasm-gc` still got it smaller. I am not making use of [`wasm-bindgen`](https://github.com/rustwasm/wasm-bindgen) or [`wasm-pack`](https://github.com/rustwasm/wasm-pack) in this project, which both attempt to remove cruft when compiling, so I utilized `wasm-gc` to do it manually.
+3. Run `./build-demo.sh` in the repository root. This creates the `monotone_crescendo.wasm` binary and an `index.html` file in a directory named `demo` in the repository root.
+4. `cd` into `demo/` and run an http server. Using python's `SimpleHTTPServer`, for example:
+```bash
+cd demo/
+python -m SimpleHTTPServer
+```
+The demo will then be available at `<localhost:8000>`.
 
 
 ## Crate Documentation
