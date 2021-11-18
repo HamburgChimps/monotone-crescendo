@@ -6,13 +6,30 @@
   <title>Monotone Crescendo in WebAssembly</title>
   <style>
     :root {
-      --bg-color: #181818;
-      --text-color: #fff;
+      --bg-color: #0f1419;
+      --text-color: #c5c5c5;
     }
 
     body {
       background: var(--bg-color);
       color: var(--text-color);
+      font: 16px/1.4 "Source Serif 4", "Noto Sans KR", serif;
+      font-feature-settings: "kern", "liga";
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    h3 {
+      color: #ffb44c;
+    }
+
+    div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
   </style>
   <script>
@@ -64,12 +81,16 @@
 </head>
 
 <body>
-  <h2>Monotone Crescendo in WebAssembly</h2>
-  <label for="solution-name">Pick the solution you want to use</label>
-  <input id="solution-name" list="solution-names" />
-  <label for="num">Please enter a binary number:</label>
-  <input id="num" type="text" />
-  <h3>Answer will appear here....</h3>
+  <h2>Monotone Crescendo</h2>
+  <div>
+    <label for="solution-name">Pick the solution you want to use:</label>
+    <input id="solution-name" list="solution-names" />
+  </div>
+  <div>
+    <label for="num">Please enter a binary number (press enter to get an answer):</label>
+    <input id="num" type="text" />
+    <h3>Answer will appear here....</h3>
+  </div>
 
   <datalist id="solution-names">
     <option value="Cumulative">
