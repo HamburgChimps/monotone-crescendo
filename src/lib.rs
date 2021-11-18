@@ -51,16 +51,34 @@ pub mod wasm_memory {
         let _ = Vec::from_raw_parts(ptr, 1024, 1024);
     }
 
+    /// # Call the specified [solution][super::solution] method with the given input
     #[no_mangle]
-    pub unsafe extern "C" fn make_me_monotone_crescendo(ptr: *mut u8) {
-        let input = CStr::from_ptr(ptr as *const i8).to_str().unwrap();
-        let flips = monototone_crescendo_cumulative(input);
-        let answer = format!("The minimum number of flips needed is: {}", flips);
+    pub unsafe extern "C" fn call_solution_with_input(
+        solution_name_ptr: *mut u8,
+        input_ptr: *mut u8,
+    ) {
+        let solution_name = CStr::from_ptr(solution_name_ptr as *const i8)
+            .to_str()
+            .unwrap();
+
+        let input = CStr::from_ptr(input_ptr as *const i8).to_str().unwrap();
+        let flips = match solution_name {
+            "Prefix Sums" => monotone_crescendo_prefix_sums(input),
+            "Cumulative" => monototone_crescendo_cumulative(input),
+            "Prefix Sums w/o Redundant Zero" => {
+                monotone_crescendo_prefix_sums_without_redundant_zero(input) as i32
+            }
+            _ => -1,
+        };
+        let answer = match flips {
+            -1 => format!("Solution name {} does not exist", solution_name),
+            _ => format!("The minimum number of flips needed is: {}", flips),
+        };
 
         let c_str = CString::new(answer).unwrap();
         let c_str_bytes = c_str.as_bytes_with_nul();
 
-        let return_bytes = std::slice::from_raw_parts_mut(ptr, 1024);
+        let return_bytes = std::slice::from_raw_parts_mut(input_ptr, 1024);
         return_bytes[..c_str_bytes.len()].copy_from_slice(c_str_bytes);
     }
 }
