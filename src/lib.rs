@@ -65,8 +65,8 @@ pub mod wasm_memory {
 
     /// # Call the specified [solution][super::solution] method with the given input
     ///
-    /// `ptr` should be a pointer to two strings separated by a null character. The first string
-    /// should be the name of solution to use, and the second string should be the input to the solution itself.
+    /// `ptr` should be a pointer containing UTF-8 encoded characters separated by a null character. The first block of characters
+    /// should be the name of solution to use, and the second block of characters should be the input to the solution itself.
     #[no_mangle]
     pub unsafe extern "C" fn call_solution_with_input(ptr: *mut u8) {
         let mut iter = ptr;
