@@ -326,8 +326,8 @@
 
     <span class="doccomment">/// # Call the specified [solution][super::solution] method with the given input</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// `ptr` should be a pointer to two strings separated by a null character. The first string</span>
-    <span class="doccomment">/// should be the name of solution to use, and the second string should be the input to the solution itself.</span>
+    <span class="doccomment">/// `ptr` should be a pointer containing UTF-8 encoded characters separated by a null character. The first block of characters</span>
+    <span class="doccomment">/// should be the name of solution to use, and the second block of characters should be the input to the solution itself.</span>
     <span class="attribute">#[<span class="ident">no_mangle</span>]</span>
     <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">call_solution_with_input</span>(<span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>) {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">ptr</span>;
