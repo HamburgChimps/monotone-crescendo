@@ -1,10 +1,22 @@
 //! A library for calculating the least number of flips needed to make a binary string monotone increasing.
 //! Also contains utility functions for allocating WebAssembly linear memory and returning a pointer to it, as well
-//! as deallocating said memory. It also contains a function that can be called via WebAssembly, and thus Javascript.
+//! as deallocating said memory.
 
 #[cfg(test)]
 mod tests {
     use super::solution::*;
+    use super::wasm_memory::call_solution_with_input;
+
+    #[test]
+    fn test_call_solution_with_input() {
+        let input = String::from("Cumulative\011010\0");
+        let mut buf = input.into_bytes();
+        let ptr = buf.as_mut_ptr();
+
+        unsafe {
+            call_solution_with_input(ptr);
+        }
+    }
 
     #[test]
     fn test_with_prefix_sums() {
@@ -29,7 +41,7 @@ pub mod wasm_memory {
     //! # Utilities for interacting with WASM's linear memory
 
     use super::solution::*;
-    use std::{ffi::CStr, ffi::CString, mem, os::raw::c_void};
+    use std::{ffi::CString, mem, os::raw::c_void};
 
     /// # Allocate memory in WebAssembly's linear memory and return its offset
     #[no_mangle]
@@ -52,24 +64,43 @@ pub mod wasm_memory {
     }
 
     /// # Call the specified [solution][super::solution] method with the given input
+    ///
+    /// `ptr` should be a pointer to two strings separated by a null character. The first string
+    /// should be the name of solution to use, and the second string should be the input to the solution itself.
     #[no_mangle]
-    pub unsafe extern "C" fn call_solution_with_input(
-        solution_name_ptr: *mut u8,
-        input_ptr: *mut u8,
-    ) {
-        let solution_name = CStr::from_ptr(solution_name_ptr as *const i8)
-            .to_str()
-            .unwrap();
+    pub unsafe extern "C" fn call_solution_with_input(ptr: *mut u8) {
+        let mut iter = ptr;
 
-        let input = CStr::from_ptr(input_ptr as *const i8).to_str().unwrap();
-        let flips = match solution_name {
-            "Prefix Sums" => monotone_crescendo_prefix_sums(input),
-            "Cumulative" => monototone_crescendo_cumulative(input),
+        let mut solution_name = String::new();
+        let mut input = String::new();
+
+        let mut null_count = 0;
+        while null_count < 2 {
+            let c = *iter as char;
+
+            iter = iter.add(1);
+
+            if c == '\0' {
+                null_count += 1;
+                continue;
+            }
+
+            match null_count {
+                0 => solution_name.push(c),
+                1 => input.push(c),
+                _ => panic!("Unexpected null_count value"),
+            }
+        }
+
+        let flips = match solution_name.as_str() {
+            "Prefix Sums" => monotone_crescendo_prefix_sums(&input),
+            "Cumulative" => monototone_crescendo_cumulative(&input),
             "Prefix Sums w/o Redundant Zero" => {
-                monotone_crescendo_prefix_sums_without_redundant_zero(input) as i32
+                monotone_crescendo_prefix_sums_without_redundant_zero(&input) as i32
             }
             _ => -1,
         };
+
         let answer = match flips {
             -1 => format!("Solution name \"{}\" does not exist", solution_name),
             _ => format!("The minimum number of flips needed is: {}", flips),
@@ -78,7 +109,7 @@ pub mod wasm_memory {
         let c_str = CString::new(answer).unwrap();
         let c_str_bytes = c_str.as_bytes_with_nul();
 
-        let return_bytes = std::slice::from_raw_parts_mut(input_ptr, 1024);
+        let return_bytes = std::slice::from_raw_parts_mut(ptr, 1024);
         return_bytes[..c_str_bytes.len()].copy_from_slice(c_str_bytes);
     }
 }
@@ -224,8 +255,6 @@ pub mod solution {
 
             flips = min(ones, flips);
         }
-
-        println!("{:?}", flips);
 
         flips
     }

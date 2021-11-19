@@ -69,18 +69,17 @@
       mc.memory = instance.exports.memory;
       mc.alloc = instance.exports.alloc;
       mc.dealloc = instance.exports.dealloc;
+      mc.callSolutionWithInput = instance.exports.call_solution_with_input;
 
-      mc.solution_pointer = mc.alloc();
-      mc.input_pointer = mc.alloc();
+      mc.pointer = mc.alloc();
     };
 
     document.addEventListener('DOMContentLoaded', async () => {
       await mc.setup();
       document.querySelector('#num').addEventListener('change', (e) => {
-        mc.write(document.querySelector('#solution-name').value, mc.memory.buffer, mc.solution_pointer);
-        mc.write(e.target.value, mc.memory.buffer, mc.input_pointer);
-        mc.instance.exports.call_solution_with_input(mc.solution_pointer, mc.input_pointer);
-        document.querySelector('h3').innerText = mc.read(mc.memory.buffer, mc.input_pointer);
+        mc.write(`${document.querySelector('#solution-name').value}\0${e.target.value}`, mc.memory.buffer, mc.pointer);
+        mc.callSolutionWithInput(mc.pointer);
+        document.querySelector('h3').innerText = mc.read(mc.memory.buffer, mc.pointer);
       });
     });
   </script>
