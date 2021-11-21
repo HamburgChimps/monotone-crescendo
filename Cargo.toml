@@ -1,11 +1,11 @@
 [package]
 name = "monotone-crescendo"
-version = "1.0.3"
+version = "1.0.4"
 edition = "2021"
 license = "MIT"
 description = """
 A library designed for use in WebAssembly that implements solutions to LeetCode #926
-NOTE: Only published to crates.io as educational experiment. This crate will not work as is if you try to use it as a dependency due to it's crate-type setting of "cdylib"
+NOTE: Only published to crates.io as educational experiment. This crate will not work as is if you try to use it as a dependency due to it's crate-type setting of "cdylib."
 """
 homepage = "https://hamburgchimps.github.io/monotone-crescendo/"
 documentation = "https://hamburgchimps.github.io/monotone-crescendo/doc/monotone_crescendo/"
