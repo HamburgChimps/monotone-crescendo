@@ -3,7 +3,10 @@ name = "monotone-crescendo"
 version = "1.0.0"
 edition = "2021"
 license = "MIT"
-description = "A library designed for use in WebAssembly that implements solutions to LeetCode #926"
+description = """
+A library designed for use in WebAssembly that implements solutions to LeetCode #926
+NOTE: Only published as educational experiment. This crate will not work as is if you try to use this crate as a dependency
+"""
 homepage = "https://hamburgchimps.github.io/monotone-crescendo/"
 documentation = "https://hamburgchimps.github.io/monotone-crescendo/doc/monotone_crescendo/"
 repository = "https://github.com/HamburgChimps/monotone-crescendo"
